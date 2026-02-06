@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle zum 70.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:  #04145a 0%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgb(222, 222, 255);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .difficulty-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-section label {
+            font-size: 18px;
+            color: #333;
+            margin-right: 15px;
+        }
+
+        .difficulty-section select {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #puzzleContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #puzzleBoard {
+            display: grid;
+            gap: 2px;
+            background: #333;
+            padding: 2px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .puzzle-piece {
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .puzzle-piece:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .puzzle-piece.empty {
+            background: #f0f0f0 !important;
+            cursor: default;
+        }
+
+        .puzzle-piece.empty:hover {
+            border-color: transparent;
+            transform: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #winMessage {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            animation: celebration 0.5s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧩 Löse das Puzzle 🧩 </h1>
+
+        <div class="difficulty-section">
+            <label for="difficulty">Schwierigkeitsgrad:</label>
+            <select id="difficulty">
+                <option value="3">Einfach (3x3)</option>
+                <option value="4" selected>Mittel (4x4)</option>
+                <option value="5">Schwer (5x5)</option>
+            </select>
+        </div>
+
+        <div id="puzzleContainer">
+            <div id="winMessage">🎉 Glückwunsch! Du hast das Puzzle gelöst! 🎉</div>
+            <div id="puzzleBoard"></div>
+            <div class="controls">
+                <button class="control-btn" onclick="shufflePuzzle()">🔀 Neu mischen</button>
+            </div>
+            <p class="info-text">Klicke auf ein Teil neben dem leeren Feld, um es zu verschieben</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // HIER DEIN BILD EINFÜGEN:
+        // Ersetze 'DEIN-BILD.jpg' durch den Dateinamen deines Bildes
+        // Das Bild muss im gleichen Ordner wie diese HTML-Datei liegen
+        // ODER verwende einen vollständigen Link wie 'https://example.com/bild.jpg'
+        // ============================================
+        const imageData = 'christmas.jpg';
+        // ============================================
+
+        let gridSize = 4;
+        let pieces = [];
+        let emptyIndex = 0;
+        let imgWidth = 0;
+        let imgHeight = 0;
+
+        const puzzleBoard = document.getElementById('puzzleBoard');
+        const difficultySelect = document.getElementById('difficulty');
+        const winMessage = document.getElementById('winMessage');
+
+        // Bild vorladen um Größe zu ermitteln
+        const img = new Image();
+        img.onload = function() {
+            imgWidth = this.width;
+            imgHeight = this.height;
+            initPuzzle();
+        };
+        img.src = imageData;
+
+        difficultySelect.addEventListener('change', () => {
+            gridSize = parseInt(difficultySelect.value);
+            initPuzzle();
+        });
+
+        function initPuzzle() {
+            winMessage.style.display = 'none';
+            puzzleBoard.innerHTML = '';
+            
+            const totalPieces = gridSize * gridSize;
+            pieces = Array.from({ length: totalPieces }, (_, i) => i);
+            emptyIndex = totalPieces - 1;
+            
+            // Berechne die Größe basierend auf dem Seitenverhältnis des Bildes
+            const maxSize = 500;
+            let boardWidth, boardHeight, pieceWidth, pieceHeight;
+            
+            if (imgWidth > imgHeight) {
+                boardWidth = Math.min(maxSize, imgWidth);
+                boardHeight = (boardWidth / imgWidth) * imgHeight;
+            } else {
+                boardHeight = Math.min(maxSize, imgHeight);
+                boardWidth = (boardHeight / imgHeight) * imgWidth;
+            }
+            
+            pieceWidth = boardWidth / gridSize;
+            pieceHeight = boardHeight / gridSize;
+            
+            puzzleBoard.style.gridTemplateColumns = `repeat(${gridSize}, ${pieceWidth}px)`;
+            puzzleBoard.style.gridTemplateRows = `repeat(${gridSize}, ${pieceHeight}px)`;
+            
+            for (let i = 0; i < totalPieces; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.dataset.index = i;
+                piece.style.width = `${pieceWidth}px`;
+                piece.style.height = `${pieceHeight}px`;
+                
+                piece.addEventListener('click', () => movePiece(i));
+                puzzleBoard.appendChild(piece);
+            }
+            
+            updateBoard();
+            setTimeout(shufflePuzzle, 100);
+        }
+
+        function updateBoard() {
+            const totalPieces = gridSize * gridSize;
+            const pieceElements = puzzleBoard.querySelectorAll('.puzzle-piece');
+            const pieceWidth = parseFloat(pieceElements[0].style.width);
+            const pieceHeight = parseFloat(pieceElements[0].style.height);
+            
+            for (let i = 0; i < totalPieces; i++) {
+                const piece = pieceElements[i];
+                const pieceValue = pieces[i];
+                
+                if (pieceValue === emptyIndex) {
+                    piece.classList.add('empty');
+                    piece.style.backgroundImage = 'none';
+                } else {
+                    piece.classList.remove('empty');
+                    const row = Math.floor(pieceValue / gridSize);
+                    const col = pieceValue % gridSize;
+                    
+                    piece.style.backgroundImage = `url(${imageData})`;
+                    piece.style.backgroundSize = `${pieceWidth * gridSize}px ${pieceHeight * gridSize}px`;
+                    piece.style.backgroundPosition = `-${col * pieceWidth}px -${row * pieceHeight}px`;
+                }
+            }
+        }
+
+        function movePiece(index) {
+            const emptyPos = pieces.indexOf(emptyIndex);
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const emptyRow = Math.floor(emptyPos / gridSize);
+            const emptyCol = emptyPos % gridSize;
+            
+            const isAdjacent = (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                               (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+            
+            if (isAdjacent) {
+                [pieces[index], pieces[emptyPos]] = [pieces[emptyPos], pieces[index]];
+                updateBoard();
+                checkWin();
+            }
+        }
+
+        function shufflePuzzle() {
+            winMessage.style.display = 'none';
+            
+            for (let i = 0; i < 1000; i++) {
+                const emptyPos = pieces.indexOf(emptyIndex);
+                const row = Math.floor(emptyPos / gridSize);
+                const col = emptyPos % gridSize;
+                
+                const possibleMoves = [];
+                if (row > 0) possibleMoves.push(emptyPos - gridSize);
+                if (row < gridSize - 1) possibleMoves.push(emptyPos + gridSize);
+                if (col > 0) possibleMoves.push(emptyPos - 1);
+                if (col < gridSize - 1) possibleMoves.push(emptyPos + 1);
+                
+                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                [pieces[emptyPos], pieces[randomMove]] = [pieces[randomMove], pieces[emptyPos]];
+            }
+            
+            updateBoard();
+        }
+
+        function checkWin() {
+            const isSolved = pieces.every((piece, index) => piece === index);
+            if (isSolved) {
+                winMessage.style.display = 'block';
+                setTimeout(() => {
+                    confetti();
+                }, 100);
+            }
+        }
+
+        function confetti() {
+            for (let i = 0; i < 50; i++) {
+                createConfetti();
+            }
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][Math.floor(Math.random() * 5)];
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.top = '-10px';
+            confetti.style.borderRadius = '50%';
+            confetti.style.pointerEvents = 'none';
+            confetti.style.zIndex = '1000';
+            document.body.appendChild(confetti);
+            
+            let top = -10;
+            const fall = setInterval(() => {
+                top += 5;
+                confetti.style.top = top + 'px';
+                confetti.style.transform = `rotate(${top * 2}deg)`;
+                
+                if (top > window.innerHeight) {
+                    clearInterval(fall);
+                    confetti.remove();
+                }
+            }, 20);
+        }
+
+    </script>
+</body>
+</html>
