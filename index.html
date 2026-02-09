@@ -12,8 +12,8 @@
         }
 
         body {
-            font-family: 'Candara';
-            background:  #04145a 0%;
+            font-family: 'Segoe UI', 'Calibri', 'Trebuchet MS', sans-serif;
+            background: #04145a;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -75,6 +75,7 @@
         .puzzle-piece {
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             cursor: pointer;
             transition: all 0.2s;
             border: 2px solid transparent;
@@ -141,11 +142,25 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #ff4444;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Glückwunsch - du hast das erste Rätsel gelöst jetzt auf zum nächsten: </h1>
+        <h1>Glückwunsch - du hast das erste Rätsel gelöst jetzt auf zum nächsten:</h1>
+
+        <div class="error-message" id="errorMessage">
+            ⚠️ Bild konnte nicht geladen werden. Bitte überprüfe den Dateinamen und stelle sicher, dass das Bild im gleichen Ordner liegt!
+        </div>
 
         <div class="difficulty-section">
             <label for="difficulty">Schwierigkeitsgrad:</label>
@@ -169,7 +184,7 @@
     <script>
         // ============================================
         // HIER DEIN BILD EINFÜGEN:
-        // Ersetze 'DEIN-BILD.jpg' durch den Dateinamen deines Bildes
+        // WICHTIG: Achte auf Groß-/Kleinschreibung!
         // Das Bild muss im gleichen Ordner wie diese HTML-Datei liegen
         // ODER verwende einen vollständigen Link wie 'https://example.com/bild.jpg'
         // ============================================
@@ -185,14 +200,23 @@
         const puzzleBoard = document.getElementById('puzzleBoard');
         const difficultySelect = document.getElementById('difficulty');
         const winMessage = document.getElementById('winMessage');
+        const errorMessage = document.getElementById('errorMessage');
 
         // Bild vorladen um Größe zu ermitteln
         const img = new Image();
         img.onload = function() {
             imgWidth = this.width;
             imgHeight = this.height;
+            errorMessage.style.display = 'none';
             initPuzzle();
         };
+        
+        img.onerror = function() {
+            errorMessage.style.display = 'block';
+            puzzleBoard.style.display = 'none';
+            console.error('Bild konnte nicht geladen werden:', imageData);
+        };
+        
         img.src = imageData;
 
         difficultySelect.addEventListener('change', () => {
