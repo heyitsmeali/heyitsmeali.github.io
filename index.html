@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle zum 70.</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -12,7 +18,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', 'Calibri', 'Trebuchet MS', sans-serif;
+            font-family: 'Raleway', sans-serif;
             background: #04145a;
             min-height: 100vh;
             display: flex;
@@ -21,13 +27,22 @@
             padding: 20px;
         }
 
+        h1, h2, h3 {
+            font-family: 'Raleway', sans-serif;
+            font-weight: 600;
+        }
+
         .container {
             background: rgb(222, 222, 255);
-            border-radius: 20px;
+            border-radius: 10px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 800px;
             width: 100%;
+        }
+
+        .header {
+            margin-bottom: 20px;
         }
 
         h1 {
@@ -54,6 +69,7 @@
             border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
+            font-family: 'Raleway', sans-serif;
         }
 
         #puzzleContainer {
@@ -105,7 +121,7 @@
         }
 
         .control-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:  #667eea;
             color: white;
             padding: 10px 25px;
             border: none;
@@ -113,6 +129,7 @@
             font-size: 14px;
             cursor: pointer;
             transition: transform 0.2s;
+            font-family: 'Raleway', sans-serif;
         }
 
         .control-btn:hover {
@@ -156,26 +173,19 @@
 </head>
 <body>
     <div class="container">
-        <h1>Glückwunsch - du hast das erste Rätsel gelöst jetzt auf zum nächsten:</h1>
-
         <div class="error-message" id="errorMessage">
             ⚠️ Bild konnte nicht geladen werden. Bitte überprüfe den Dateinamen und stelle sicher, dass das Bild im gleichen Ordner liegt!
         </div>
 
-        <div class="difficulty-section">
-            <label for="difficulty">Schwierigkeitsgrad:</label>
-            <select id="difficulty">
-                <option value="3">Einfach (3x3)</option>
-                <option value="4" selected>Mittel (4x4)</option>
-                <option value="5">Schwer (5x5)</option>
-            </select>
+        <div class="header">
+            <h1>LÖSE DAS PUZZLE</h1>
         </div>
 
         <div id="puzzleContainer">
             <div id="winMessage">🎉 Glückwunsch! Du hast das Puzzle gelöst! 🎉</div>
             <div id="puzzleBoard"></div>
             <div class="controls">
-                <button class="control-btn" onclick="shufflePuzzle()">🔀 Neu mischen</button>
+                <button class="control-btn" onclick="shufflePuzzle()"> NEU MISCHEN</button>
             </div>
             <p class="info-text">Klicke auf ein Teil neben dem leeren Feld, um es zu verschieben</p>
         </div>
@@ -188,17 +198,17 @@
         // Das Bild muss im gleichen Ordner wie diese HTML-Datei liegen
         // ODER verwende einen vollständigen Link wie 'https://example.com/bild.jpg'
         // ============================================
-        const imageData = 'bild.jpg';
+        const imageData = 'bild2.jpg';
         // ============================================
 
-        let gridSize = 4;
+        let gridSize = 3;
         let pieces = [];
         let emptyIndex = 0;
         let imgWidth = 0;
         let imgHeight = 0;
 
         const puzzleBoard = document.getElementById('puzzleBoard');
-        const difficultySelect = document.getElementById('difficulty');
+       // const difficultySelect = document.getElementById('difficulty');
         const winMessage = document.getElementById('winMessage');
         const errorMessage = document.getElementById('errorMessage');
 
@@ -219,10 +229,15 @@
         
         img.src = imageData;
 
-        difficultySelect.addEventListener('change', () => {
-            gridSize = parseInt(difficultySelect.value);
-            initPuzzle();
+        // Alert-Popup beim Laden der Seite
+        window.addEventListener('load', function() {
+            alert('🎉 Glückwunsch - du hast das erste Rätsel gelöst!\n\nJetzt auf zum nächsten...');
         });
+
+        // difficultySelect.addEventListener('change', () => {
+        //     gridSize = parseInt(difficultySelect.value);
+        //     initPuzzle();
+        // });
 
         function initPuzzle() {
             winMessage.style.display = 'none';
