@@ -182,7 +182,7 @@
         </div>
 
         <div id="puzzleContainer">
-            <div id="winMessage">🎉 Glückwunsch! Du hast das Puzzle gelöst! 🎉</div>
+            <div id="winMessage">Glückwunsch! Du hast das Puzzle gelöst! </b> Frag jetzt Valentin nach dem Umschlag. </div>
             <div id="puzzleBoard"></div>
             <div class="controls">
                 <button class="control-btn" onclick="shufflePuzzle()"> NEU MISCHEN</button>
@@ -196,7 +196,7 @@
         const imageData = 'bild1.JPG'; //
        
 
-        let gridSize = 2;
+        let gridSize = 3;
         let pieces = [];
         let emptyIndex = 0;
         let imgWidth = 0;
@@ -226,7 +226,7 @@
 
         // Alert-Popup beim Laden der Seite
         window.addEventListener('load', function() {
-            alert('🎉 Glückwunsch - du hast das erste Rätsel gelöst!\n\nJetzt auf zum nächsten...');
+            alert('Ein normales Geschenk wäre ja viel zu einfach...');
         });
 
         // difficultySelect.addEventListener('change', () => {
